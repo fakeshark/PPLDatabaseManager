@@ -36,9 +36,13 @@
             this.checkDatabaseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dgvDbOutput = new System.Windows.Forms.DataGridView();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.btnImportPplData = new System.Windows.Forms.Button();
-            this.btnShowAllRecords = new System.Windows.Forms.Button();
             this.lblActiveDoc = new System.Windows.Forms.Label();
+            this.btnLoadPplData = new System.Windows.Forms.Button();
+            this.btnShowAllRecords = new System.Windows.Forms.Button();
+            this.btnImportPplData = new System.Windows.Forms.Button();
+            this.lbxActivePPLparts = new System.Windows.Forms.ListBox();
+            this.lblDatabaseTitle = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDbOutput)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -105,31 +109,43 @@
             this.dgvDbOutput.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvDbOutput.Location = new System.Drawing.Point(13, 47);
             this.dgvDbOutput.Name = "dgvDbOutput";
-            this.dgvDbOutput.Size = new System.Drawing.Size(889, 409);
+            this.dgvDbOutput.Size = new System.Drawing.Size(825, 409);
             this.dgvDbOutput.TabIndex = 3;
             // 
             // groupBox1
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.lbxActivePPLparts);
+            this.groupBox1.Controls.Add(this.btnImportPplData);
             this.groupBox1.Controls.Add(this.lblActiveDoc);
-            this.groupBox1.Location = new System.Drawing.Point(911, 41);
+            this.groupBox1.Location = new System.Drawing.Point(844, 41);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(176, 415);
+            this.groupBox1.Size = new System.Drawing.Size(243, 415);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Options:";
             // 
-            // btnImportPplData
+            // lblActiveDoc
             // 
-            this.btnImportPplData.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnImportPplData.Location = new System.Drawing.Point(911, 462);
-            this.btnImportPplData.Name = "btnImportPplData";
-            this.btnImportPplData.Size = new System.Drawing.Size(176, 38);
-            this.btnImportPplData.TabIndex = 5;
-            this.btnImportPplData.Text = "&Import PPL Data";
-            this.btnImportPplData.UseVisualStyleBackColor = true;
-            this.btnImportPplData.Click += new System.EventHandler(this.btnImportPplData_Click);
+            this.lblActiveDoc.AutoSize = true;
+            this.lblActiveDoc.Location = new System.Drawing.Point(6, 16);
+            this.lblActiveDoc.Name = "lblActiveDoc";
+            this.lblActiveDoc.Size = new System.Drawing.Size(121, 13);
+            this.lblActiveDoc.TabIndex = 0;
+            this.lblActiveDoc.Text = "Active Document: None";
+            // 
+            // btnLoadPplData
+            // 
+            this.btnLoadPplData.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnLoadPplData.Location = new System.Drawing.Point(853, 462);
+            this.btnLoadPplData.Name = "btnLoadPplData";
+            this.btnLoadPplData.Size = new System.Drawing.Size(228, 38);
+            this.btnLoadPplData.TabIndex = 5;
+            this.btnLoadPplData.Text = "&Load PPL Data";
+            this.btnLoadPplData.UseVisualStyleBackColor = true;
+            this.btnLoadPplData.Click += new System.EventHandler(this.btnImportPplData_Click);
             // 
             // btnShowAllRecords
             // 
@@ -142,22 +158,55 @@
             this.btnShowAllRecords.UseVisualStyleBackColor = true;
             this.btnShowAllRecords.Click += new System.EventHandler(this.btnShowAllRecords_Click);
             // 
-            // lblActiveDoc
+            // btnImportPplData
             // 
-            this.lblActiveDoc.AutoSize = true;
-            this.lblActiveDoc.Location = new System.Drawing.Point(12, 23);
-            this.lblActiveDoc.Name = "lblActiveDoc";
-            this.lblActiveDoc.Size = new System.Drawing.Size(121, 13);
-            this.lblActiveDoc.TabIndex = 0;
-            this.lblActiveDoc.Text = "Active Document: None";
+            this.btnImportPplData.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnImportPplData.Enabled = false;
+            this.btnImportPplData.Location = new System.Drawing.Point(6, 65);
+            this.btnImportPplData.Name = "btnImportPplData";
+            this.btnImportPplData.Size = new System.Drawing.Size(231, 29);
+            this.btnImportPplData.TabIndex = 7;
+            this.btnImportPplData.Text = "&Import PPL Data";
+            this.btnImportPplData.UseVisualStyleBackColor = true;
+            this.btnImportPplData.Click += new System.EventHandler(this.btnImportPplData_Click_1);
+            // 
+            // lbxActivePPLparts
+            // 
+            this.lbxActivePPLparts.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbxActivePPLparts.FormattingEnabled = true;
+            this.lbxActivePPLparts.Location = new System.Drawing.Point(9, 116);
+            this.lbxActivePPLparts.Name = "lbxActivePPLparts";
+            this.lbxActivePPLparts.Size = new System.Drawing.Size(228, 290);
+            this.lbxActivePPLparts.TabIndex = 8;
+            // 
+            // lblDatabaseTitle
+            // 
+            this.lblDatabaseTitle.AutoSize = true;
+            this.lblDatabaseTitle.Location = new System.Drawing.Point(10, 28);
+            this.lblDatabaseTitle.Name = "lblDatabaseTitle";
+            this.lblDatabaseTitle.Size = new System.Drawing.Size(88, 13);
+            this.lblDatabaseTitle.TabIndex = 9;
+            this.lblDatabaseTitle.Text = "Database Output";
+            // 
+            // label1
+            // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 100);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(67, 13);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "Parts Listing:";
             // 
             // frmPPLDatabaseForm1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1096, 512);
+            this.Controls.Add(this.lblDatabaseTitle);
             this.Controls.Add(this.btnShowAllRecords);
-            this.Controls.Add(this.btnImportPplData);
+            this.Controls.Add(this.btnLoadPplData);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.dgvDbOutput);
             this.Controls.Add(this.lblDbStatus);
@@ -185,9 +234,13 @@
         private System.Windows.Forms.ToolStripMenuItem importPPLDataToolStripMenuItem;
         private System.Windows.Forms.DataGridView dgvDbOutput;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Button btnImportPplData;
+        private System.Windows.Forms.Button btnLoadPplData;
         private System.Windows.Forms.Button btnShowAllRecords;
         private System.Windows.Forms.Label lblActiveDoc;
+        private System.Windows.Forms.ListBox lbxActivePPLparts;
+        private System.Windows.Forms.Button btnImportPplData;
+        private System.Windows.Forms.Label lblDatabaseTitle;
+        private System.Windows.Forms.Label label1;
     }
 }
 

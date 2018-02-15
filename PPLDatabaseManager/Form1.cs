@@ -13,6 +13,7 @@ using System.IO;
 using ExcelDataReader;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using System.Security.Cryptography;
 
 namespace PPLDatabaseManager
 {
@@ -20,13 +21,14 @@ namespace PPLDatabaseManager
     {
         string ConnectionString = "server=localhost; database=partsdb; user=root";
         SqlStatements SqlSt = new SqlStatements();
+        List<string[]> pplData = new List<string[]>();
 
         public frmPPLDatabaseForm1()
         {
             InitializeComponent();
             CheckDbConnection(false);
         }
-        
+
         private void CheckDbConnection(bool msgBox)
         {
             string msg;
@@ -66,6 +68,8 @@ namespace PPLDatabaseManager
 
         private void btnImportPplData_Click(object sender, EventArgs e)
         {
+            btnImportPplData.Enabled = false;
+
             importPPLData();
         }
 
@@ -93,7 +97,8 @@ namespace PPLDatabaseManager
                             using (var reader = ExcelReaderFactory.CreateReader(stream))
                             {
                                 var ds = reader.AsDataSet();
-                                List<string[]> pplData = new List<string[]>();
+                                pplData.Clear();
+
                                 List<string> pplRow = new List<string>();
 
                                 foreach (DataRow dataRow in ds.Tables[0].Rows)
@@ -103,20 +108,47 @@ namespace PPLDatabaseManager
                                         string cell = dataRow.ItemArray[i].ToString();
                                         pplRow.Add(cell);
                                     }
+
+                                    // set the unique PARTID, a concatenation of the PLISN, INDC, CAGE, PN, and NHA fields
                                     string[] pplRowArr = pplRow.ToArray();
+                                    string PartId = pplRowArr[1].Trim() + pplRowArr[2].Trim() + pplRowArr[3].Trim() + pplRowArr[4].Trim() + pplRowArr[31].Trim();
+                                    string hashPart = string.Empty;
+
+                                    // one way hash for making PARTID a fixed length (28) for unique column
+                                    using (SHA1 sha1 = SHA1.Create())
+                                    {
+                                        byte[] prehash = sha1.ComputeHash(Encoding.UTF32.GetBytes(PartId));
+                                        byte[] hash = sha1.ComputeHash(prehash);
+                                        hashPart = Convert.ToBase64String(hash);
+                                    }
+                                    pplRow.Add(hashPart);
+                                    pplRowArr = pplRow.ToArray();
+
+                                    // prevent excel header row from being added to the data set
+                                    if (pplRowArr[0] != "PCCN")
+                                    {
+                                        pplData.Add(pplRowArr);
+                                    }
                                     pplRow.Clear();
-                                    pplData.Add(pplRowArr);
                                 }
 
-                                SqlSt.AddPplDataToDatabase(pplData);
-                                DisplayAllDbRecords();
+                                lblActiveDoc.Text = "Active Document: " + pplFileSelected.SafeFileName + "\nParts Count: " + pplData.Count.ToString();
+                                if (pplData.Count > 0)
+                                {
+                                    lbxActivePPLparts.Items.Clear();
+                                    foreach (string[] row in pplData)
+                                    {
+                                        lbxActivePPLparts.Items.Add(row[4]);
+                                    }
+                                    btnImportPplData.Enabled = true;
+                                }
                             }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("There has been an error!\n\n" + ex.Message, "Error!");
+
                 }
             }
         }
@@ -152,6 +184,26 @@ namespace PPLDatabaseManager
             catch (Exception ex)
             {
                 MessageBox.Show("Error:  " + ex.Message);
+            }
+        }
+
+        private void btnImportPplData_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                if (pplData.Count > 0)
+                {
+                    SqlSt.ValidatePPLData(pplData, SqlSt.PplDbRows);
+                    SqlSt.AddPplDataToDatabase(pplData);
+                    DisplayAllDbRecords();
+                }
+                lbxActivePPLparts.Items.Clear();
+                lblActiveDoc.Text = "Active Document: None";
+                btnImportPplData.Enabled = false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There has been an error!\n\n" + ex.Message, "Error!");
             }
         }
     }
