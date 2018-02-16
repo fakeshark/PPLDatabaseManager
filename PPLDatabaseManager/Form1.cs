@@ -22,11 +22,64 @@ namespace PPLDatabaseManager
         string ConnectionString = "server=localhost; database=partsdb; user=root";
         SqlStatements SqlSt = new SqlStatements();
         List<string[]> pplData = new List<string[]>();
+        List<string> savedQueryList = new List<string>();
 
         public frmPPLDatabaseForm1()
         {
             InitializeComponent();
             CheckDbConnection(false);
+            SetDbDrivenFormControls();
+        }
+
+        public class ComboboxItem
+        {
+            public string Text { get; set; }
+            public object Value { get; set; }
+
+            public override string ToString()
+            {
+                return Text;
+            }
+        }
+
+        private void SetDbDrivenFormControls()
+        {
+            try
+            {
+                MySqlConnection connection = new MySqlConnection();
+                connection.ConnectionString = ConnectionString;
+                string selectAllQuery = "SELECT * FROM `storedquery`";
+
+                MySqlCommand selectcmd = new MySqlCommand(selectAllQuery, connection);
+                MySqlDataAdapter adapter = new MySqlDataAdapter(selectcmd);
+
+                System.Data.DataTable dt = new System.Data.DataTable();
+                adapter.Fill(dt);
+                int counter = 0;
+                savedQueryList.Clear();
+                cbxSavedCommands.Items.Clear();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    if (counter == 0)
+                    {
+                        btnRunActiveCommand.Text = (dr["QUERYNAME"].ToString());
+                    }
+
+                    ComboboxItem item = new ComboboxItem();
+
+
+                    item.Text = dr["QUERYNAME"].ToString();
+                    savedQueryList.Add(dr["QUERY"].ToString());
+
+                    cbxSavedCommands.Items.Add(item);
+                    counter++;
+                }
+                cbxSavedCommands.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                btnRunActiveCommand.Text = "...";
+            }
         }
 
         private void CheckDbConnection(bool msgBox)
@@ -46,6 +99,7 @@ namespace PPLDatabaseManager
                         MessageBox.Show(msg);
                     }
                     connection.Close();
+                    SetDbDrivenFormControls();
                 }
             }
             catch (Exception)
@@ -160,7 +214,18 @@ namespace PPLDatabaseManager
 
         private void btnShowAllRecords_Click(object sender, EventArgs e)
         {
-            DisplayAllDbRecords();
+            Button btn = sender as Button;
+            if (btn.Text == "...")
+            {
+                    MessageBox.Show("There is a problem connecting to the database, make sure the database is running and try again.", "Error");
+                CheckDbConnection(false);
+            }
+            else
+            {
+                string[] queryArray = savedQueryList.ToArray();
+                int selectIndex = cbxSavedCommands.SelectedIndex;
+                RunActiveCommand(queryArray[selectIndex]);
+            }
         }
 
         private void DisplayAllDbRecords()
@@ -187,6 +252,36 @@ namespace PPLDatabaseManager
             }
         }
 
+        private void RunActiveCommand(string Query)
+        {
+            string message = string.Empty;
+            try
+            {
+                MySqlConnection connection = new MySqlConnection();
+                connection.ConnectionString = ConnectionString;
+                string selectAllQuery = Query;
+                MySqlCommand selectcmd = new MySqlCommand(selectAllQuery, connection);
+
+                //Clear out DataGridView control
+                dgvDbOutput.DataSource = null;
+
+                System.Data.DataTable dt = new System.Data.DataTable();
+                MySqlDataAdapter adapter = new MySqlDataAdapter(selectcmd);
+                adapter.Fill(dt);
+                dgvDbOutput.DataSource = dt;
+                //dgvDbOutput.Update();
+                message = "Your command has executed successfully.";
+            }
+            catch (Exception ex)
+            {
+                message = "Your command failed.\n\n" + ex.Message;
+            }
+            finally
+            {
+                MessageBox.Show(message, "Result:");
+            }
+        }
+
         private void btnImportPplData_Click_1(object sender, EventArgs e)
         {
             try
@@ -205,6 +300,27 @@ namespace PPLDatabaseManager
             {
                 MessageBox.Show("There has been an error!\n\n" + ex.Message, "Error!");
             }
+        }
+
+        private void cbxSavedCommands_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string[] queryArray = savedQueryList.ToArray();
+            int selectIndex = cbxSavedCommands.SelectedIndex;
+            txtSqlTestString.Text = queryArray[selectIndex];
+            btnRunActiveCommand.Text = cbxSavedCommands.SelectedItem.ToString();
+        }
+
+        private void btnRunTestCommand_Click(object sender, EventArgs e)
+        {
+            if (txtSqlTestString.Text != "")
+            {
+                RunActiveCommand(txtSqlTestString.Text);
+            }
+        }
+
+        private void quitApplicationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }
