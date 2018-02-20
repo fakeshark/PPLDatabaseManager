@@ -288,9 +288,14 @@ namespace PPLDatabaseManager
             {
                 if (pplData.Count > 0)
                 {
-                    SqlSt.ValidatePPLData(pplData, SqlSt.PplDbRows);
-                    SqlSt.AddPplDataToDatabase(pplData);
+                    List<List<string[]>> ValidatedRows = SqlSt.ValidatePPLData(pplData, SqlSt.PplDbRows);
+
+                    SqlSt.AddPplDataToDatabase(ValidatedRows[0]);
                     DisplayAllDbRecords();
+                    if (ValidatedRows[1].Count > 0)
+                    {
+                        MessageBox.Show("Errors present in the data prevented " + ValidatedRows[1].Count + " rows from being added to the database.\n\nWould you like to attempt to fix the data?");
+                    }
                 }
                 lbxActivePPLparts.Items.Clear();
                 lblActiveDoc.Text = "Active Document: None";
@@ -321,6 +326,11 @@ namespace PPLDatabaseManager
         private void quitApplicationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void btnSaveCommand_Click(object sender, EventArgs e)
+        {
+            //do this
         }
     }
 }

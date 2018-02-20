@@ -240,6 +240,7 @@
             this.btnSaveCommand.TabIndex = 12;
             this.btnSaveCommand.Text = "Save Command";
             this.btnSaveCommand.UseVisualStyleBackColor = true;
+            this.btnSaveCommand.Click += new System.EventHandler(this.btnSaveCommand_Click);
             // 
             // cbxSavedCommands
             // 

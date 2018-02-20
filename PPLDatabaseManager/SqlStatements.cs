@@ -29,11 +29,23 @@ namespace PPLDatabaseManager
                         int rowsInserted = myCmd.ExecuteNonQuery();
                         if (rowsInserted > 0)
                         {
-                            MessageBox.Show("Import successful.\n\n" + rowsInserted + " rows have been added to the database.", "Import Results");
+                            string msg = string.Empty;
+                            if (rowsInserted < rowArray.Count)
+                            {
+                                msg = "Import successful.\n\n" + rowsInserted + " rows have been added to the database.\n\n" +
+                                            (rowArray.Count - rowsInserted) + " rows were skipped to prevent duplicate data being added to the database.\n";
+                            }
+
+                            if (rowsInserted == rowArray.Count)
+                            {
+                                msg = "Import successful.\n\n" + rowsInserted + " rows have been added to the database.\n";
+                            }
+
+                            MessageBox.Show(msg, "Import Results");
                         }
                         else
                         {
-                            MessageBox.Show("No rows have been imported.\n\nThis may be that the data already exists in the database or is improperly formatted.", "Import Results");
+                            MessageBox.Show("Import Failed.\n\nNo rows have been imported.\nThis is typically caused by attempting to insert data that already exists in the database.\n", "Import Results");
                         }
                     }
                 }
@@ -147,8 +159,11 @@ namespace PPLDatabaseManager
             return insertStatement;
         }
 
-        public void ValidatePPLData(List<string[]> data, string[] columnType)
-        {           
+        public List<List<string[]>> ValidatePPLData(List<string[]> data, string[] columnType)
+        {
+            List<string[]> ValidRows = new List<string[]>();
+            List<string[]> InvalidRows = new List<string[]>();
+            List<List<string[]>> ValidatedRows = new List<List<string[]>>();
 
             #region Size Validation
             foreach (string[] dataRow in data)
@@ -161,20 +176,28 @@ namespace PPLDatabaseManager
                     {
                         errorMsg += "PCCN is incorrect length.\n";
                     }
-                    if (columnType[i] == "PLISN" && !CheckMinMaxLength(dataRow[i].Trim(), 0, 100))
+
+
+                    if (columnType[i] == "PLISN" && !CheckMinMaxLength(dataRow[i].Trim(), 4, 5))
                     {
                         errorMsg += "PLISN is incorrect length.\n";
                     }
-                    if (columnType[i] == "INDC" && !CheckMinMaxLength(dataRow[i].Trim(), 0, 100))
+                    if (columnType[i] == "PLISN" && (dataRow[i].Trim().Contains("I") || dataRow[i].Trim().Contains("O")))
+                    {
+                        errorMsg += "PLISN contains illegal character. (PLISN can not contain 'I' or 'O')\n";
+                    }
+
+
+                    if (columnType[i] == "INDC" && !CheckMinMaxLength(dataRow[i].Trim(), 1, 1))
                     {
                         errorMsg += "INDC is incorrect length.\n";
                     }
-                    if (columnType[i] == "CAGE" && !CheckMinMaxLength(dataRow[i].Trim(), 0, 100))
+                    if (columnType[i] == "CAGE" && !CheckMinMaxLength(dataRow[i].Trim(), 5, 5))
                     {
                         errorMsg += "CAGE is incorrect length.\n";
                     }
 
-                    if (columnType[i] == "PN" && !CheckMinMaxLength(dataRow[i].Trim(), 0, 100))
+                    if (columnType[i] == "PN" && !CheckMinMaxLength(dataRow[i].Trim(), 1, 32))
                     {
                         errorMsg += "PN is incorrect length.\n";
                     }
@@ -309,7 +332,7 @@ namespace PPLDatabaseManager
                         errorMsg += "ADPEC is incorrect length.\n";
                     }
 
-                    if (columnType[i] == "NHA" && !CheckMinMaxLength(dataRow[i].Trim(), 0, 100))
+                    if (columnType[i] == "NHA" && !CheckMinMaxLength(dataRow[i].Trim(), 0, 6))
                     {
                         errorMsg += "NHA is incorrect length.\n";
                     }
@@ -1043,13 +1066,18 @@ namespace PPLDatabaseManager
                 if (errorMsg != "")
                 {
                     MessageBox.Show("The following error(s) were found in your data: \n\n" + errorMsg, "Data Formating Error");
+                    InvalidRows.Add(dataRow);
+                }
+                else
+                {
+                    ValidRows.Add(dataRow);
                 }
             }
             #endregion
+            ValidatedRows.Add(ValidRows);
+            ValidatedRows.Add(InvalidRows);
 
-            #region Data Type Validation
-
-            #endregion
+            return ValidatedRows;
         }
 
         private bool CheckMinMaxLength(string data, int min, int max)
